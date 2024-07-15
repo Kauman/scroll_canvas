@@ -7,7 +7,7 @@ from config import *
 def pick_and_remove_name(address: str):
     chosen_name = random.choice(base_names)
     base_names.remove(chosen_name)
-    with open("data\used_names.txt", "a") as file:
+    with open("data/used_names.txt", "a") as file:
         file.write(f"{address}:{chosen_name}\n")
     return chosen_name
 

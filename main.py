@@ -9,7 +9,7 @@ from config import *
 
 
 def get_signature(wallet):
-    url = f"https://canvas.scroll.cat/code/6CC2Z/sig/{wallet}"
+    url = f"https://canvas.scroll.cat/code/{random.choice(REFFERAL)}/sig/{wallet}"
     headers = {
         "Host": "canvas.scroll.cat",
         "Sec-Ch-Ua": '"Not/A)Brand";v="8", "Chromium";v="126"',
@@ -36,6 +36,41 @@ def get_signature(wallet):
     except Exception as e:
         print(e)
 
+def collect_ref(address: str):
+    url = f'https://canvas.scroll.cat/acc/{address}/code'
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+        'cache-control': 'no-cache',
+        'origin': 'https://scroll.io',
+        'pragma': 'no-cache',
+        'priority': 'u=1, i',
+        'referer': 'https://scroll.io/',
+        'sec-ch-ua': '"Google Chrome";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"macOS"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'cross-site',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    }
+
+    try:
+        if PROXY is True:
+            response = requests.get(url, headers=headers, proxies=proxies)
+        else:
+            response = requests.get(url, headers=headers)
+            
+        ref_code = response.json()["code"]
+    
+        with open("data/refferal.txt", "a") as file:
+            file.write(f"{address}:{ref_code}")
+            
+        return ref_code
+    except Exception as e:
+        print(e)
+    
+    
 
 def check_minted():
     contract = w3.eth.contract(address=Web3.to_checksum_address(CONTRACT_ADDRESS), abi=CONTRACT_ABI)
@@ -112,6 +147,8 @@ if PROXY is True:
         is_minted = check_minted()
         if is_minted is not True:
             success = mint_shit()
+        
+        if COLLECT_REF: collect_ref(address)
         utils.end_actions()
                 
             
@@ -129,4 +166,6 @@ else:
         is_minted = check_minted()
         if is_minted is not True:
             success = mint_shit()
+            
+        if COLLECT_REF: collect_ref(address)
         utils.end_actions()
