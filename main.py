@@ -75,7 +75,7 @@ def check_minted():
     contract = w3.eth.contract(address=Web3.to_checksum_address(CONTRACT_ADDRESS), abi=CONTRACT_ABI)
     getprofile = contract.functions.getProfile(account.address).call()
     is_claimed = contract.functions.isProfileMinted(getprofile).call()
-    print(f"CANVAS Profile already minted!", is_claimed)
+    print(f"CANVAS Profile already minted!" if is_claimed else "CANVAS Profile NOT already minted!")
     return is_claimed
 
 def mint_shit():
