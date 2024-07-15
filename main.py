@@ -64,7 +64,7 @@ def collect_ref(address: str):
             
         ref_code = response.json()["code"]
     
-        with open("data\\refferal.txt", "a") as file:
+        with open("data\\new_refferal.txt", "a") as file:
             file.write(f"{address}:{ref_code}\n")
             
         return ref_code
