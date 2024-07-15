@@ -29,12 +29,13 @@ with open('data\private_keys.txt', 'r') as file:
 with open('data\proxy.txt', 'r') as proxy_file:
     proxies = [line.strip() for line in proxy_file]
     
+with open('data\\refferal.txt', 'r') as proxy_file:
+    REFFERAL = [line.strip() for line in proxy_file]
+    
 with open("data\usernames.txt", "r") as file:
     base_names = [name.strip() for name in file.readlines() if len(name) < 10]
 
 MOBILE_PROXY = ""
 CHANGE_IP_LINK = ""
-
-REFFERAL = ["QYJM7"]
 
 COLLECT_REF = True
