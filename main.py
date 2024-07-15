@@ -30,6 +30,7 @@ def get_signature(wallet):
             response = requests.get(url, headers=headers, proxies=proxies)
         else:
             response = requests.get(url, headers=headers)
+        
         data = json.loads(response.text)
         signature = data.get("signature")
         return signature
@@ -63,14 +64,12 @@ def collect_ref(address: str):
             
         ref_code = response.json()["code"]
     
-        with open("data/refferal.txt", "a") as file:
-            file.write(f"{address}:{ref_code}")
+        with open("data\\refferal.txt", "a") as file:
+            file.write(f"{address}:{ref_code}\n")
             
         return ref_code
     except Exception as e:
         print(e)
-    
-    
 
 def check_minted():
     contract = w3.eth.contract(address=Web3.to_checksum_address(CONTRACT_ADDRESS), abi=CONTRACT_ABI)
@@ -78,7 +77,6 @@ def check_minted():
     is_claimed = contract.functions.isProfileMinted(getprofile).call()
     print(f"CANVAS Profile already minted!", is_claimed)
     return is_claimed
-
 
 def mint_shit():
     try:
@@ -112,60 +110,46 @@ def mint_shit():
         print(e)
         
         
-        
 index = 0
+
+print(f"PROXY MODE") if PROXY else "WITHOUT PROXY"
+if MOBILE_PROXY != "" and CHANGE_IP_LINK != "": proxies = [MOBILE_PROXY] * len(private_keys)
+if PROXY == False: proxies = [""] * len(private_keys)
+
+for private_key, proxy_info in zip(private_keys, proxies):
+    proxies = {
+        'http': f"http://{proxy_info}",
+        'https': f"http://{proxy_info}"
+    }
+    index += 1
     
-if PROXY is True:
-    print(f"PROXY MODE")
-    if MOBILE_PROXY != "" and CHANGE_IP_LINK != "": proxies = [MOBILE_PROXY] * len(private_keys) 
-    for private_key, proxy_info in zip(private_keys, proxies):
-        proxies = {
-            'http': f"http://{proxy_info}",
-            'https': f"http://{proxy_info}"
-        }
-        index += 1
-        
-        w3 = Web3(Web3.HTTPProvider(
-            endpoint_uri=RPC_SCROLL, 
-            request_kwargs={
-                "proxies": {
-                    'https': f"http://{proxy_info}", 
-                    'http': f"http://{proxy_info}"
-                }
+    w3 = Web3(Web3.HTTPProvider(
+        endpoint_uri=RPC_SCROLL, 
+        request_kwargs={
+            "proxies": {
+                'https': f"http://{proxy_info}", 
+                'http': f"http://{proxy_info}"
             }
-        ))
-        
-        account = Account.from_key(private_key)
-        address = account.address
-        tx_count = w3.eth.get_transaction_count(address)
-        balance = w3.from_wei(w3.eth.get_balance(address), 'ether')
-        print(f"№{index} | {address} | TX: {tx_count} | {balance} | PROXY: {proxy_info}")
-        if balance < w3.to_wei(0.001, "ether"):
-            print("Balance less than 0.001 ETH for mint Scroll Canvas")
-            print("sleeping before next acc")
-            
-        is_minted = check_minted()
-        if is_minted is not True:
-            success = mint_shit()
-        
-        if COLLECT_REF: collect_ref(address)
+        }
+    )) if PROXY else Web3(Web3.HTTPProvider(RPC_SCROLL))
+    
+    account = Account.from_key(private_key)
+    address = account.address        
+    tx_count = w3.eth.get_transaction_count(address)
+    balance = w3.from_wei(w3.eth.get_balance(address), 'ether')
+    print(f"№{index} | {address} | TX: {tx_count} | {balance} | PROXY: {proxy_info}")
+    if balance < 0.0006:
+        print("Balance less than 0.0006 ETH for mint Scroll Canvas")
+        print("sleeping before next acc")
         utils.end_actions()
-                
-            
-else:
-    print(f"WITHOUT PROXY")
-    for private_key in private_keys:
-        index += 1
-        w3 = Web3(Web3.HTTPProvider(RPC_SCROLL))
-        account = Account.from_key(private_key)
-        address = account.address
-        tx_count = w3.eth.get_transaction_count(address)
-        balance = w3.from_wei(w3.eth.get_balance(address), 'ether')
-        print(f"№{index} | {address} | TX: {tx_count} | {balance} | WITHOUT PROXY")
-        
-        is_minted = check_minted()
-        if is_minted is not True:
-            success = mint_shit()
-            
-        if COLLECT_REF: collect_ref(address)
-        utils.end_actions()
+        continue
+    else:
+        print(balance, balance)
+
+    
+    is_minted = check_minted()
+    if is_minted is not True:
+        success = mint_shit()
+    
+    if COLLECT_REF: collect_ref(address)
+    utils.end_actions()
